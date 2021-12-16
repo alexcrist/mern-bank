@@ -1,5 +1,6 @@
 const express = require('express');
 const cors = require('cors');
+const { initDB, getAmount, setAmount } = require('./dal');
 
 const app = express();
 app.use(cors());
@@ -13,22 +14,19 @@ app.get('/', (req, res) => {
 // =============================================================================
 // Banking endpoints
 
-let dollarAmount = 13;
-
 // Endpoint to get dollar amount
-app.get('/amount', (req, res) => {
-  res.send({
-    amount: dollarAmount
-  });
+app.get('/amount', async (req, res) => {
+  const amount = await getAmount();
+  res.send({ amount });
 });
 
 // Endpoint to update the dollar amount
-app.get('/edit/amount/:newValue', (req, res) => {
+app.get('/edit/amount/:newValue', async (req, res) => {
   const newDollarAmount = Number(req.params.newValue);
   if (isNaN(newDollarAmount)) {
     res.sendStatus(400);
   } else {
-    dollarAmount = newDollarAmount;
+    await setAmount(newDollarAmount);
     res.sendStatus(200);
   }
 });
@@ -37,4 +35,5 @@ app.get('/edit/amount/:newValue', (req, res) => {
 
 app.listen(port, () => {
   console.log(`App is listening on http://localhost:${port}`);
+  initDB();
 });
